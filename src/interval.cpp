@@ -2,7 +2,7 @@
 
 #include "interval.h"
 
-#if defined(_MSC_VER) | defined(__BORLANDC__) 
+#if defined(_MSC_VER) | defined(__BORLANDC__)
 // Enable the use of isnan().
 #include <float.h>
 #ifndef isnan
@@ -13,7 +13,7 @@
 const unsigned long nan[2] = {0xffffffff, 0xffffffff};
 const double nan_double = -*(double*)nan;
 #endif // NAN_CONSTS_NEEDED
-#endif // defined(_MSC_VER) | defined(__BORLANDC__) 
+#endif // defined(_MSC_VER) | defined(__BORLANDC__)
 
 #ifdef NAI_CONST_NEEDED
 // Used to define NAI (Not An Interval).
@@ -316,7 +316,7 @@ interval Exp(const interval& a)
 }
 //----------------------------------------------------------------------
 interval Step(const interval& X)
-{ 
+{
 	if (X.isEmpty) return interval();
 	if (X.inf>0) return (interval(1));
 	if (X.sup<0) return (interval(0));
@@ -1125,8 +1125,8 @@ void Cmoins(interval& Z, double& y, interval& X, int sens)
 }
 //----------------------------------------------------------------------
 /*void Cprod(interval& Z, interval& Y, interval& X, int sens)
-/*  Z=Y*X           =>  sens=1;
-Y=Z/X; X=Z/Y    =>  sens=-1;  * /
+  Z=Y*X           =>  sens=1;
+Y=Z/X; X=Z/Y    =>  sens=-1;
 { if (sens==1)  {Z=Inter(Z,Y*X);}
 if (sens==-1) {Y=Inter(Y,Z/X); X=Inter(X,Z/Y); Y=Inter(Y,Z/X); }
 }   */
@@ -1245,7 +1245,7 @@ void CDet(interval& det, interval& ux, interval& uy, double& vx, double& vy, int
 
 //----------------------------------------------------------------------
 double DistanceDirSegment(double mx, double my, double theta, double ax, double ay, double bx, double by)
-{      // Distance directionnelle du point m au segment [a,b]. La direction est donnée par theta
+{      // Distance directionnelle du point m au segment [a,b]. La direction est donnï¿½e par theta
 	double ma_x = ax - mx;
 	double ma_y = ay - my;
 	double mb_x = bx - mx;
@@ -1266,7 +1266,7 @@ double DistanceDirSegment(double mx, double my, double theta, double ax, double 
 }
 //----------------------------------------------------------------------
 double DistanceDirSegments(double mx, double my, double theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // Distance directionnelle relativement à un polygone
+{      // Distance directionnelle relativement ï¿½ un polygone
 	vector<double> dist(ax.size());
 	for (unsigned int j = 0; j < ax.size(); j++)
 		dist[j] = DistanceDirSegment(mx, my, theta, ax[j], ay[j], bx[j], by[j]);
@@ -1300,7 +1300,7 @@ double DistanceDirCercle(double mx, double my, double theta, double cx, double c
 }
 //----------------------------------------------------------------------
 double DistanceDirCercles(double mx, double my, double theta, vector<double> cx, vector<double> cy, vector<double> r)
-{      // Distance directionnelle relativement à plusieurs cercles
+{      // Distance directionnelle relativement ï¿½ plusieurs cercles
 	vector<double> dist(cx.size());
 	for (unsigned int j = 0; j < cx.size(); j++)
 		dist[j] = DistanceDirCercle(mx, my, theta, cx[j], cy[j], r[j]);
@@ -1309,7 +1309,7 @@ double DistanceDirCercles(double mx, double my, double theta, vector<double> cx,
 }
 //----------------------------------------------------------------------
 void CinSegment(interval& mx, interval& my, double ax, double ay, double bx, double by)
-{      // contracte relativement à la contrainte : "m appartient au segment [a,b]"
+{      // contracte relativement ï¿½ la contrainte : "m appartient au segment [a,b]"
 	mx = Inter(mx, Union(interval(ax, ax), interval(bx, bx)));
 	my = Inter(my, Union(interval(ay, ay), interval(by, by)));
 	interval ma_x = ax - mx;
@@ -1324,7 +1324,7 @@ void CinSegment(interval& mx, interval& my, double ax, double ay, double bx, dou
 }
 //----------------------------------------------------------------------
 void CinCircle(interval& mx, interval& my, double cx, double cy, double r)
-{      // contracte relativement à la contrainte : "m appartient au cercle de centre c et de rayon r"
+{      // contracte relativement ï¿½ la contrainte : "m appartient au cercle de centre c et de rayon r"
 	interval d_x = mx - cx;
 	interval d_y = my - cy;
 	interval d2_x = Sqr(d_x);
@@ -1386,7 +1386,7 @@ if ((mx.isEmpty)||(my.isEmpty)||(px.isEmpty)||(py.isEmpty))
 */
 //----------------------------------------------------------------------
 void CinSegments(interval& mx, interval& my, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // contracte relativement à la contrainte : "m appartient au polygone dont les segments sont les [ai,bi]"
+{      // contracte relativement ï¿½ la contrainte : "m appartient au polygone dont les segments sont les [ai,bi]"
 	vector<interval> Mx(ax.size());
 	vector<interval> My(ax.size());
 	for (unsigned int j = 0; j < ax.size(); j++)
@@ -1402,7 +1402,7 @@ void CinSegments(interval& mx, interval& my, vector<double> ax, vector<double> a
 }
 //----------------------------------------------------------------------
 void CinCircles(interval& mx, interval& my, vector<double> cx, vector<double> cy, vector<double> r)
-{      // contracte relativement à la contrainte : "m appartient à un des cercles de centre ci et de rayon ri"
+{      // contracte relativement ï¿½ la contrainte : "m appartient ï¿½ un des cercles de centre ci et de rayon ri"
 	if (cx.size() == 0) return;
 	vector<interval> Mx(cx.size());
 	vector<interval> My(cx.size());
@@ -1434,14 +1434,14 @@ void CinSegmentsOrCircles(interval& mx, interval& my, vector<double> ax, vector<
 	{
 		mx = mx1; my = my1;
 	};
-	if ((ax.size() == 0)&(cy.size() >= 0))          // pas de segments
+	if ((ax.size() == 0)&(cy.size() != 0))          // pas de segments
 	{
 		mx = mx2; my = my2;
 	};
 }
 //----------------------------------------------------------------------
 void CLegOnWalls(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // Toutes les pattes doivent être sur le mur
+{      // Toutes les pattes doivent ï¿½tre sur le mur
 	interval ux = Cos(theta);
 	interval uy = Sin(theta);
 	interval dx = ux*dist;
@@ -1458,7 +1458,7 @@ void CLegOnWalls(interval& dist, interval& px, interval& py, interval& theta, ve
 }
 //----------------------------------------------------------------------
 void CLegOnWallsOrCircles(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, vector<double> cx, vector<double> cy, vector<double> r)
-{      // Toutes les pattes doivent être sur le mur ou sur un des cercles
+{      // Toutes les pattes doivent ï¿½tre sur le mur ou sur un des cercles
 	interval ux = Cos(theta);
 	interval uy = Sin(theta);
 	interval dx = ux*dist;
@@ -1476,7 +1476,7 @@ void CLegOnWallsOrCircles(interval& dist, interval& px, interval& py, interval& 
 //----------------------------------------------------------------------
 /*
 void CPatteCroiseAucunSegment(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // Aucun segment ne doit être croisé
+{      // Aucun segment ne doit ï¿½tre croisï¿½
 interval ux=Cos(theta);
 interval uy=Sin(theta);
 interval dx=ux*dist;
@@ -1541,7 +1541,7 @@ for (int i=0;i<V.size();i++)
 E.push_back(V[i]);
 }
 x=Enveloppe(E);
-} 
+}
 */
 /*
 void C_q_in(interval& x, int q, vector<interval>& y)
@@ -1650,7 +1650,7 @@ void CDistanceDirSegment(interval& dist, interval& mx, interval& my, interval& t
 }
 //----------------------------------------------------------------------
 void CDistanceDirSegments(interval& distmin, interval& mx, interval& my, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // Distance directionnelle relativement à un polygone
+{      // Distance directionnelle relativement ï¿½ un polygone
 	vector<interval> dist(ax.size());
 	for (unsigned int j = 0; j < ax.size(); j++)  dist[j] = interval(0, oo);
 	for (unsigned int j = 0; j < ax.size(); j++)
@@ -1662,7 +1662,7 @@ void CDistanceDirSegments(interval& distmin, interval& mx, interval& my, interva
 
 /*    Version normalement plus efficace
 void CDistanceDirSegments(interval& distmin, interval& mx, interval& my, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by)
-{      // Distance directionnelle relativement à un polygone
+{      // Distance directionnelle relativement ï¿½ un polygone
 box P(3);   P[1]=mx;  P[2]=my;   P[3]=theta;
 
 vector<interval> dist(ax.size());
@@ -1838,7 +1838,7 @@ b=max-1(a,c); c=max-1(a,b)       =>  sens=-1; */
 //-----------------------------------------------------------------------
 //             PROCEDURES DE CONTRACTION ELEMENTAIRE
 //-----------------------------------------------------------------------
-/* Ceci est le code choisit pour désignés chacune des fontions élementaires
+/* Ceci est le code choisit pour dï¿½signï¿½s chacune des fontions ï¿½lementaires
 ABS    <=>   'B'   ?
 COS    <=>   'C'
 SIN    <=>   'S'
@@ -1867,8 +1867,8 @@ void Contract0(char code, interval& Y)
 }
 //-----------------------------------------------------------------------
 void Contract0(char code, interval& Y, interval& X, int sens)
-/* Procédure de propagation de contraintes binaires sur les
-  intervalles, cette procédure est chargée de faire appel à une
+/* Procï¿½dure de propagation de contraintes binaires sur les
+  intervalles, cette procï¿½dure est chargï¿½e de faire appel ï¿½ une
   des fonctions binaires.
   exemple:  Y=sin(X)     =>   Contract0('S',Y,X,1)
   X=sin-1(Y)   =>   Contract0('S',Y,X,-1) */
@@ -1891,16 +1891,16 @@ void Contract0(char code, interval& Y, interval& X, int sens)
 }
 //----------------------------------------------------------------------
 /*void Contract0 (char code, interval& Y, interval& X, int n, int sens)
-   Procédure de propagation de contraintes concernant la puissance entière
-   sur les intervalles : Y=X^n, cette procédure est chargée de faire appel à
-   l'opérateur élémentaire Power.
+   Procï¿½dure de propagation de contraintes concernant la puissance entiï¿½re
+   sur les intervalles : Y=X^n, cette procï¿½dure est chargï¿½e de faire appel ï¿½
+   l'opï¿½rateur ï¿½lï¿½mentaire Power.
    exemple:  Y=Power(X,n)     =>   Contract0('P',Y,X,n,1)
    X=Power-1(Y,n)   =>   Contract0('P',Y,X,n,-1)
    { if (code=='P') Cpower(Y,X,n,sens); } */
 //----------------------------------------------------------------------
 void Contract0(char code, interval& Z, interval& Y, interval& X, int sens)
-/* Procédure de propagation de contraintes ternaires sur les
-  intervalles, cette procédure est chargée de faire appel aux
+/* Procï¿½dure de propagation de contraintes ternaires sur les
+  intervalles, cette procï¿½dure est chargï¿½e de faire appel aux
   fonctions ternaires.
   exemple:  Z=Y+X         =>  Contract0('+',Z,Y,X,1)
   Y=Z-X; X=Z-Y  =>  Contract0('+',Z,Y,X,-1) */
@@ -1939,7 +1939,7 @@ void IntButterfly(interval& Y, interval Yo, interval dY, interval& X, interval X
 }
 //----------------------------------------------------------------------
 //modifs???
-// RETURN LA DIFFERENCE ENTRE 2 intervalles x0, x1 et place le résultat dans c0 et c1.
+// RETURN LA DIFFERENCE ENTRE 2 intervalles x0, x1 et place le rï¿½sultat dans c0 et c1.
 // ON suppose que x0 inclus dans x1.
 void diffI(interval &x0, interval &x1, interval &c0, interval &c1)
 {
@@ -1947,8 +1947,8 @@ void diffI(interval &x0, interval &x1, interval &c0, interval &c1)
 	if (x1.isEmpty)
 	{
 		c0 = interval(); c1 = interval();
-	} 
-	else 
+	}
+	else
 	{
 		c0 = (x1.inf == x0.inf) ? interval() : interval(x1.inf,x0.inf);
 		c1 = (x0.sup == x1.sup) ? interval() : interval(x0.sup,x1.sup);

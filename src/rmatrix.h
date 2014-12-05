@@ -10,7 +10,7 @@
 #include "tnt.h"
 using namespace TNT;
 
-#include "matrix_lib/jama_lu.h"
+#include "jama_lu.h"
 using namespace JAMA;
 
 

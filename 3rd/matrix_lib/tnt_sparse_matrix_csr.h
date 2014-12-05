@@ -41,7 +41,7 @@ namespace TNT
 	nz nonzeros requires no more than  ((T+I)*nz + M*I)
 	bytes, where T is the size of data elements and
 	I is the size of integers.
-	
+
 
 */
 template <class T>
@@ -54,13 +54,13 @@ private:
 
     int dim1_;        // number of rows
     int dim2_;        // number of cols
-  
+
 public:
 
 	Sparse_Matrix_CompRow(const Sparse_Matrix_CompRow &S);
-	Sparse_Matrix_CompRow(int M, int N, int nz, const T *val, 
+	Sparse_Matrix_CompRow(int M, int N, int nz, const T *val,
 						const int *r, const int *c);
-    
+
 
 
     inline   const T&      val(int i) const { return val_[i]; }
@@ -93,8 +93,8 @@ public:
 */
 template <class T>
 Sparse_Matrix_CompRow<T>::Sparse_Matrix_CompRow(int M, int N, int nz,
-	const T *val, const int *r, const int *c) : val_(nz,val), 
-		rowptr_(M, r), colind_(nz, c), dim1_(M), dim2_(N) {}
+	const T *val, const int *r, const int *c) : val_(nz,val),
+		rowptr_(M, *r), colind_(nz, *c), dim1_(M), dim2_(N) {}
 
 
 }

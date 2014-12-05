@@ -22,10 +22,10 @@
 
 #ifdef __BORLANDC__
 #undef UNREFERENCED_PARAMETER
-#define UNREFERENCED_PARAMETER(P) 
+#define UNREFERENCED_PARAMETER(P)
 #endif // __BORLANDC__
 
-// To avoid Visual Studio 2013 warning about overflow in floating-point constant arithmetic 
+// To avoid Visual Studio 2013 warning about overflow in floating-point constant arithmetic
 // each time INFINITY or NAN is used.
 #if (_MSC_VER >= 1800)
 #pragma warning(disable : 4056)
@@ -35,7 +35,7 @@
 #define INFINITY HUGE_VAL
 #endif // INFINITY
 
-#if defined(_MSC_VER) | defined(__BORLANDC__) 
+#if defined(_MSC_VER) | defined(__BORLANDC__)
 // Used to define NAN (Not A Number).
 #ifndef NAN
 extern const unsigned long nan[2];
@@ -43,7 +43,7 @@ extern const double nan_double;
 #define NAN nan_double
 #define NAN_CONSTS_NEEDED
 #endif // NAN
-#endif // defined(_MSC_VER) | defined(__BORLANDC__) 
+#endif // defined(_MSC_VER) | defined(__BORLANDC__)
 
 // Infinity is denoted by oo.
 #ifndef oo
@@ -61,7 +61,7 @@ extern const interval nai;
 #endif // NAI
 
 #ifdef __BCPLUSPLUS__
-//#define oo 1/0.0 //definition de l'infini noté oo
+//#define oo 1/0.0 //definition de l'infini notï¿½ oo
 /* #define cos 0
 #define sin 1
 #define sinc 2
@@ -185,7 +185,7 @@ public:
 	//--------------------------------------------------------------------------
 	//    PROCEDURES TRADUISANT LE C.S.P POUR (SIN, COS, PLUS, EXP, ...)
 	//--------------------------------------------------------------------------
-	//             Contrainte Spécifique
+	//             Contrainte Spï¿½cifique
 	friend void      Csame_sign(interval&, interval&);
 	friend void      Cgeq(interval&, interval&);
 	//            Contraintes Unaires
@@ -210,10 +210,6 @@ public:
 	friend void      Crect(interval&, interval&, int);
 	friend void      Cpower(interval&, interval&, int, int);
 	friend void      Ctriangle(interval&, interval&, int);
-	friend void      Cramp(interval&, interval&, int, double a = 0);
-	friend void      Cstep(interval&, interval&, int, double a = 0);
-	friend void      Cheaviside(interval&, interval&, int, double a = 0);
-	friend void      Csign(interval&, interval&, int, double a = 0);
 	//              Contraintes Ternaires
 	friend void      Crect(interval&, interval&, interval&, int);
 	friend void      Cplus(interval&, interval&, interval&, int);
@@ -248,7 +244,7 @@ public:
 	friend void CPatteCroiseAucunSegment(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
 
 
-	//------- Procédure de réduction élémentaires sur les intervalles ----------
+	//------- Procï¿½dure de rï¿½duction ï¿½lï¿½mentaires sur les intervalles ----------
 	friend void      Contract0(char, interval&, interval&, int);
 	//friend void      Contract0       (char, interval&, interval&, int, int);
 	//friend void      Contract0       (char, interval&, interval&, int, int n=0);
@@ -260,6 +256,11 @@ public:
 	friend void      IntButterfly(interval& Y, interval Yo, interval dY, interval& X, interval Xo, int sens);
 	//modifs???
 };
+
+void      Cramp(interval&, interval&, int, double a = 0);
+void      Cstep(interval&, interval&, int, double a = 0);
+void      Cheaviside(interval&, interval&, int, double a = 0);
+void      Csign(interval&, interval&, int, double a = 0);
 
 double    DistanceDirSegment(double mx, double my, double theta, double ax, double ay, double bx, double by);
 double    DistanceDirSegments(double mx, double my, double theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);

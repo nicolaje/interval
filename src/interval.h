@@ -1,7 +1,20 @@
-// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS.
+// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS and Jeremy NICOLA.
 
 #ifndef __INTERVAL__
 #define __INTERVAL__
+
+#ifdef _MSC_VER
+// Disable some Visual Studio warnings.
+#	ifndef CRT_SECURE_NO_DEPRECATE
+#		define CRT_SECURE_NO_DEPRECATE
+#	endif // CRT_SECURE_NO_DEPRECATE
+#	ifndef _CRT_SECURE_NO_WARNINGS
+#		define _CRT_SECURE_NO_WARNINGS
+#	endif // _CRT_SECURE_NO_WARNINGS
+//#	ifndef _CRT_NONSTDC_NO_WARNINGS
+//#		define _CRT_NONSTDC_NO_WARNINGS
+//#	endif // _CRT_NONSTDC_NO_WARNINGS
+#endif // _MSC_VER
 
 #include <vector>
 #include <iomanip>
@@ -22,20 +35,25 @@
 
 #ifdef __BORLANDC__
 #undef UNREFERENCED_PARAMETER
-#define UNREFERENCED_PARAMETER(P)
+#define UNREFERENCED_PARAMETER(P) 
 #endif // __BORLANDC__
 
-// To avoid Visual Studio 2013 warning about overflow in floating-point constant arithmetic
+// To avoid Visual Studio 2013 warning about overflow in floating-point constant arithmetic 
 // each time INFINITY or NAN is used.
 #if (_MSC_VER >= 1800)
 #pragma warning(disable : 4056)
 #endif // (_MSC_VER >= 1800)
 
+// To avoid Visual Studio warnings that would happen for any project using interval. 
+#ifdef _MSC_VER
+#pragma warning(disable : 4996)
+#endif // _MSC_VER
+
 #ifndef INFINITY
 #define INFINITY HUGE_VAL
 #endif // INFINITY
 
-#if defined(_MSC_VER) | defined(__BORLANDC__)
+#if defined(_MSC_VER) || defined(__BORLANDC__) 
 // Used to define NAN (Not A Number).
 #ifndef NAN
 extern const unsigned long nan[2];
@@ -43,10 +61,12 @@ extern const double nan_double;
 #define NAN nan_double
 #define NAN_CONSTS_NEEDED
 #endif // NAN
-#endif // defined(_MSC_VER) | defined(__BORLANDC__)
+#endif // defined(_MSC_VER) || defined(__BORLANDC__) 
 
 // Infinity is denoted by oo.
 #ifndef oo
+//#define oo 1.0/0.0
+//#define oo 1000000000.0
 #define oo INFINITY
 #endif // oo
 
@@ -60,25 +80,50 @@ extern const interval nai;
 #define NAI_CONST_NEEDED
 #endif // NAI
 
-#ifdef __BCPLUSPLUS__
-//#define oo 1/0.0 //definition de l'infini not� oo
-/* #define cos 0
-#define sin 1
-#define sinc 2
-#define tan 3
-#define atan 4  */
-#else
-//#define oo 1000000000
-#endif
-
 using namespace std;
 
-typedef double reel;
-double Arccossin(const double&, const double&);
-double Arg(const double&, const double&);
-double Sign(const double& x);
-double Chi(const double a, const double b, const double c);
+// Include <QDataStream> and <QDebug> before this file to be able to use Qt specific features if you have Qt.
+#ifdef QT_VERSION 
+class QDataStream;
+class QDebug;
+#else
+#define qDebug() std::cout
+#endif // QT_VERSION 
 
+// Deprecated.
+typedef double reel;
+
+//----------------------------------------------------------------------
+// Useful real-valued functions
+//----------------------------------------------------------------------
+double Min(vector<double>& x);
+double Max(vector<double>& x);
+double Sign(const double x);
+double Chi(const double a, const double b, const double c);
+double Arccossin(const double x, const double y);
+double Arg(const double x, const double y);
+double Det(double ux, double uy, double vx, double vy);
+double DistanceDirSegment(double mx, double my, double theta, double ax, double ay, double bx, double by);
+void DistanceDirSegment(double& d, double& phi, double mx, double my, double theta, double ax, double ay, double bx, double by);
+double DistanceDirSegments(double mx, double my, double theta, 
+						   vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+void DistanceDirSegments(double& d, double& phi, double mx, double my, double theta, 
+						 vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+#define DistanceDirCercle DistanceDirCircle
+#define DistanceDirCercles DistanceDirCircles
+double DistanceDirCircle(double mx, double my, double theta, double cx, double cy, double r);
+void DistanceDirCircle(double& d, double& phi, double mx, double my, double theta, double cx, double cy, double r);
+double DistanceDirCircles(double mx, double my, double theta, vector<double> cx, vector<double> cy, vector<double> r);
+void DistanceDirCircles(double& d, double& phi, double mx, double my, double theta, 
+						vector<double> cx, vector<double> cy, vector<double> r);
+double DistanceDirSegmentsOrCircles(double mx, double my, double theta,
+									vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by,
+									vector<double> cx, vector<double> cy, vector<double> r);
+void DistanceDirSegmentsOrCircles(double& d, double& phi, double mx, double my, double theta,
+								  vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by,
+								  vector<double> cx, vector<double> cy, vector<double> r);
+
+// Used by q_in only.
 class borne
 {
 public:
@@ -86,7 +131,7 @@ public:
 	int ouverture;
 	borne();
 	borne(const double&, const int&);
-	friend bool     operator<(const borne &x, const borne &y);
+	friend bool operator<(const borne &x, const borne &y);
 };
 
 class interval
@@ -97,173 +142,262 @@ public:
 	bool isEmpty;
 
 public:
-	//--------------------------------------------------------------------------
-	//                           CONSTRUCTEURS
-	//--------------------------------------------------------------------------
+	//----------------------------------------------------------------------
+	// Constructors/destructors
+	//----------------------------------------------------------------------
 	interval();
 	interval(const double&); // Pas const pour conversion double -> interval
 	interval(const double&, const double&);
 	interval(const interval&);
-	interval& operator= (const interval&);
+	//----------------------------------------------------------------------
+	// Operators
+	//----------------------------------------------------------------------
+	interval& operator=(const interval&);
+	friend interval operator+(const interval&, const interval&);
+	friend interval operator-(const interval&);
+	friend interval operator-(const interval&, const interval&);
+	friend interval operator*(const double, const interval&);
+	friend interval operator*(const interval&, const double);
+	friend interval operator*(const interval&, const interval&);
+	friend interval operator/(const interval&, const interval&);
+	friend interval operator&(const interval&, const interval&);
+	friend interval operator|(const interval&, const interval&);
+	friend bool operator==(const interval&, const interval&);
+	friend std::ostream& operator<<(std::ostream& os, const interval& a);
+#ifdef QT_VERSION 
+	inline friend QDataStream& operator<<(QDataStream& s, const interval& i)
+	{
+		s << i.inf << i.sup << i.isEmpty;
+		return s;
+	}
+
+	inline friend QDataStream& operator>>(QDataStream& s, interval& i)
+	{
+		s >> i.inf >> i.sup >> i.isEmpty;
+		return s;
+	}
+
+	inline friend QDebug operator<<(QDebug os, const interval& a)
+	{
+		if (a.isEmpty) os.nospace() << "EmptyInterval";
+		else if (a.inf != a.sup)
+		{ 
+			os.nospace() << "[" << a.inf << ", " << a.sup << "] ";
+		}
+		else os.nospace() << a.inf;
+		return os.space();
+	}
+#endif // QT_VERSION 
+	//----------------------------------------------------------------------
+	// Member functions
+	//----------------------------------------------------------------------
 	interval& Intersect(const interval&);
-	//--------------------------------------------------------------------------
-	//                          OPERATEURS
-	//--------------------------------------------------------------------------
-	friend interval operator& (const interval&, const interval&);
-	friend interval operator+ (const interval&, const interval&);
-	friend interval operator- (const interval&);
-	friend interval operator- (const interval&, const interval&);
-	friend interval operator* (const double, const interval&);
-	friend interval operator* (const interval&, const double);
-	friend interval operator* (const interval&, const interval&);
-	friend interval operator/ (const interval&, const interval&);
-	friend bool operator== (const interval&, const interval&);
-	friend ostream& operator<< (ostream&, const interval&);
-	//--------------------------------------------------------------------------
-	//                 FONCTION  ET PROCEDURES AMIES
-	//--------------------------------------------------------------------------
-	friend interval  Abs(const interval&);
-	friend interval  Cos(const interval&);
-	friend double    Det(double&, double&, double&, double&);
-	friend interval  Det(interval&, interval&, interval&, interval&);
-	friend double    DistanceDirSegment(double mx, double my, double theta, double ax, double ay, double bx, double by);
-	friend double    DistanceDirSegments(double mx, double my, double theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
-	friend double    DistanceDirCercles(double mx, double my, double theta, vector<double> cx, vector<double> cy, vector<double> r);
-
-	friend interval  Exp(const interval&);
-	friend interval  Inflate(const interval&, double);
-	friend interval  Inter(const interval&, const interval&);
-	friend interval  Inter(vector<interval> x);
-	friend interval  InterMin(const interval&, const interval&, char);
-	friend interval  Log(const interval&);
-	friend interval  Max(const interval&, const interval&);
-	friend double    Max(vector<double>& x);
-	friend interval  Min(const interval&, const interval&);
-	friend interval  Min(const interval&, const interval&, const interval&);
-	friend double    Min(vector<double>& x);
-	friend interval  Parabole(const interval&, double, double, double);
-	friend interval  Power(const interval&, int);
-	friend interval  Pow(const interval&, int);
-	friend interval  Pow(const interval&, int, int);
-	friend interval  PowRoot(const interval&, int, int);
-	friend interval  Sin(const interval&);
-	friend interval  Sqr(const interval&);
-	friend interval  Sqrt(const interval&);
-    friend interval  Step(const interval&);
-
-	friend interval  InvSqrt(const interval&);
-	friend interval  Union(const interval&, const interval&);
-	friend interval  Union(vector<interval> x);
-	friend interval  Tan(const interval&);
-
-	friend iboolean  In(const interval&, const interval&);
-
-	friend bool      Disjoint(const interval&, const interval&);
-	friend bool      In(double, const interval&);
-	friend bool      Subset(const interval&, const interval&);
-	friend bool      SubsetStrict(const interval& a, const interval& b);
-	friend bool      Subset(const interval&, const interval&, double);
-	friend bool      OverLap(const interval&, const interval&);
-
-	friend void      Sucre(interval&, const interval&);
-	friend void      Inter1(interval&, interval&, const interval&, const interval&, const interval&);
-
-	friend double      Inf(const interval&);
-	friend double      Sup(const interval&);
-	friend double      Rand(const interval&);
-	friend double      Center(const interval&);
-	friend double      Eloignement(const interval&, const interval&);
-	friend double      Marge(const interval&, const interval&);
-	friend double      AbsMax(const interval&);
-	friend double      ToReel(const interval&);
-    friend double      Todouble(const interval&);
-	friend double      Width(const interval&);
-	friend double      Width2(const interval&);
-
-    friend void diffI(interval &x0, interval &x1, interval &c0, interval &c1);
-
-	//--------------------------------------------------------------------------
-	//    PROCEDURES TRADUISANT LE C.S.P POUR (SIN, COS, PLUS, EXP, ...)
-	//--------------------------------------------------------------------------
-	//             Contrainte Sp�cifique
-	friend void      Csame_sign(interval&, interval&);
-	friend void      Cgeq(interval&, interval&);
-	//            Contraintes Unaires
-	friend void      Cinteger(interval&);
-	friend void      Cboolean(interval&);
-
-	//             Contraintes Binaires
-	friend void      Csin(interval&, interval&, int);
-	friend void      Ccos(interval&, interval&, int);
-	friend void      Csinc(interval&, interval&, int);
-	friend void      Cexp(interval&, interval&, int);
-	friend void      Clog(interval&, interval&, int);
-	friend void      Ctan(interval&, interval&, int);
-	friend void      Catan(interval&, interval&, int);
-	friend void      Csqr(interval&, interval&, int);
-	friend void      Csqrt(interval&, interval&, int);
-
-	friend void      Cmoins(interval&, interval&, int);
-	friend void      Cegal(interval&, interval&, int);
-	friend void      Cegal(interval&, interval&);
-	friend void      Cabs(interval&, interval&, int);
-	friend void      Crect(interval&, interval&, int);
-	friend void      Cpower(interval&, interval&, int, int);
-	friend void      Ctriangle(interval&, interval&, int);
-	//              Contraintes Ternaires
-	friend void      Crect(interval&, interval&, interval&, int);
-	friend void      Cplus(interval&, interval&, interval&, int);
-	friend void      Cplus(double&, interval&, interval&, int);
-	friend void      Cplus(interval&, double&, interval&, int);
-	friend void      Cmoins(interval&, interval&, interval&, int);
-	friend void      Cmoins(double&, interval&, interval&, int);
-	friend void      Cmoins(interval&, interval&, double& x, int);
-	friend void      CNorm(interval&, interval&, interval&);
-	friend void      Cprod(interval&, interval&, interval&, int);
-	friend void      Cprod(interval&, double&, interval&, int);
-	friend void      Cdiv(interval&, interval&, interval&, int);
-	friend void      Cmin(interval&, interval&, interval&, int);
-	friend void      Cmin(interval&, interval&, interval&, interval&, int);
-	friend int       Cmin(interval&, vector<interval>&, int);
-	friend void      Cmax(interval&, interval&, interval&, int);
-	friend void      C_q_in(interval& x, int, vector<interval>&);
-
-	friend int      CAngle(interval&, interval&, interval&, interval&, interval&, bool);
-	friend void     Cchi(interval&, interval&, interval&, interval&);
-	friend void     CDistanceDirSegment(interval&, interval&, interval&, interval&, double, double, double, double, int);
-	friend void     CDistanceDirSegments(interval&, interval&, interval&, interval&, vector<double>, vector<double>, vector<double>, vector<double>);
-	friend void     CinSegment(interval& mx, interval& my, double ax, double ay, double bx, double by);
-	friend void     CinCircle(interval& mx, interval& my, double cx, double cy, double r);
-	friend void     CinSegments(interval& mx, interval& my, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
-	friend void     CinCircles(interval& mx, interval& my, vector<double> cx, vector<double> cy, vector<double> r);
-	friend void     CinSegmentsOrCircles(interval& mx, interval& my, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, vector<double> cx, vector<double> cy, vector<double> r);
-	friend void CLegOnWallsOrCircles(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, vector<double> cx, vector<double> cy, vector<double> r);
-
-
-	friend void     CLegOnWalls(interval&, interval&, interval&, interval&, vector<double>, vector<double>, vector<double>, vector<double>);
-	friend void CPatteCroiseAucunSegment(interval& dist, interval& px, interval& py, interval& theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
-
-
-	//------- Proc�dure de r�duction �l�mentaires sur les intervalles ----------
-	friend void      Contract0(char, interval&, interval&, int);
-	//friend void      Contract0       (char, interval&, interval&, int, int);
-	//friend void      Contract0       (char, interval&, interval&, int, int n=0);
-	friend void      Contract0(char, interval&, interval&, interval&, int);
-	//friend void      Contract0       (char, interval&, double&    , interval&, int); //Luc
-	friend void      Contract0(char, interval&);
-	//modifs???
-	friend void      ShowContraction(interval&, interval&, interval&, interval&);
-	friend void      IntButterfly(interval& Y, interval Yo, interval dY, interval& X, interval Xo, int sens);
-	//modifs???
 };
 
-void      Cramp(interval&, interval&, int, double a = 0);
-void      Cstep(interval&, interval&, int, double a = 0);
-void      Cheaviside(interval&, interval&, int, double a = 0);
-void      Csign(interval&, interval&, int, double a = 0);
+//----------------------------------------------------------------------
+// Interval-valued functions
+//----------------------------------------------------------------------
+interval Min(const interval&, const interval&);
+interval Min(const interval&, const interval&, const interval&);
+interval Max(const interval&, const interval&);
+interval Max(const interval&, const interval&, const interval&);
+//Sign?
+interval Abs(const interval&);
+interval Modulo(const interval& a, double x);
+interval Sqr(const interval&);
+interval Sqrt(const interval&);
+interval InvSqrt(const interval&);
+interval Exp(const interval&);
+interval Log(const interval&);
+interval Pow(const interval&, int);
+interval Pow(const interval& x, int num, int den);
+interval Power(const interval&, int);
+interval PowRoot(const interval& x, int num, int den);
+interval Cos(const interval&);
+interval Sin(const interval&);
+interval Tan(const interval&);
+//Arg/Atan2, param order like double version?
+interval Det(interval& ux, interval& uy, interval& vx, interval& vy);
+interval Det(interval& ux, interval& uy, double& vx, double& vy);
+interval Step(const interval&);
+interval Parabole(const interval&, double, double, double);
+interval Inter(const interval&, const interval&);
+interval Inter(vector<interval> x);
+interval Union(const interval&, const interval&);
+interval Union(vector<interval> x);
+interval InterMin(const interval&, const interval&, char);
+interval Inflate(const interval&, double);
+#define Enveloppe Envelope
+interval Envelope(vector<double>& x);
+//----------------------------------------------------------------------
+// Other functions
+//----------------------------------------------------------------------
+double Inf(const interval&);
+double Sup(const interval&);
+double Center(const interval&);
+double Width(const interval&);
+double Marge(const interval&, const interval&);
+#define ToReel ToReal
+#define Todouble ToReal
+double ToReal(const interval&);
+double Rand(const interval&);
+double Eloignement(const interval&, const interval&);
+double AbsMax(const interval&);
+bool OverLap(const interval&, const interval&);
+bool Disjoint(const interval&, const interval&);
+bool Subset(const interval&, const interval&);
+bool Subset(const interval&, const interval&, double epsilon);
+bool SubsetStrict(const interval& a, const interval& b);
+iboolean In(const interval&, const interval&);
+bool In(double, const interval&);
+//----------------------------------------------------------------------
+// Contractors
+//----------------------------------------------------------------------
+#define Cplus Cadd
+void Cadd(interval& Z, interval& X, interval& Y, int sens = 0);
+void Cadd(interval& Z, double x, interval& Y, int sens = 0);
+void Cadd(interval& Z, interval& X, double y, int sens = 0);
+void Cadd(double z, interval& X, interval& Y, int sens = 0);
+#define Cmoins Csub
+void Csub(interval& Z, interval& X, interval& Y, int sens = 0);
+void Csub(interval& Z, double x, interval& Y, int sens = 0);
+void Csub(interval& Z, interval& X, double y, int sens = 0);
+void Csub(double z, interval& X, interval& Y, int sens = 0);
+void Csub(interval& Y, interval& X, int sens = 0);
+#define Cprod Cmul
+void Cmul(interval& Z, interval& X, interval& Y, int sens = 0);
+void Cmul(interval& Z, double x, interval& Y, int sens = 0);
+void Cmul(interval& Z, interval& X, double y, int sens = 0);
+void Cdiv(interval& Z, interval& X, interval& Y, int sens = 0);
+#define Cegal Cequal
+void Cequal(interval& Y, interval& X, int sens);
+void Cequal(interval& Y, interval& X);
+void Cmin(interval& a, interval& b, interval& c, int sens = 0);
+void Cmin(interval& a, interval& b, interval& c, interval& d, int sens = 0);
+void Cmin(interval& a, interval& b, interval& c, interval& d, interval& e, int sens = 0);
+int Cmin(interval& a, vector<interval>& x, int sens = 0);
+void Cmax(interval& a, interval& b, interval& c, int sens = 0);
+void Cabs(interval& Y, interval& X, int sens = 0);
+#define Csame_sign Csign
+void Csign(interval& Y, interval& X);
+void Csign(interval& Y, interval& X, int sens, double a = 0);
+void Cchi(interval& F, interval& A, interval& B, interval& C);
+void Cgeq(interval& Y, interval& X);
+void Cinteger(interval&);
+void Cboolean(interval&);
+void Csqr(interval& Y, interval& X, int sens = 0);
+void Csqrt(interval& Y, interval& X, int sens = 0);
+void Cexp(interval& Y, interval& X, int sens = 0);
+void Clog(interval& Y, interval& X, int sens = 0);
+#define Cpower Cpow
+void Cpow(interval& Y, interval& X, int n, int sens = 0);
+void Ccos(interval& Y, interval& X, int sens = 0);
+void Csin(interval& Y, interval& X, int sens = 0);
+void Ctan(interval& Y, interval& X, int sens = 0);
+void Catan(interval& Y, interval& X, int sens = 0);
+void Csinc(interval& Y, interval& X, int sens = 0);
+//Carg (different from CAngle, with less parameters...)?
+int CAngle(interval& X2, interval& Y2, interval& Theta, interval& X1, interval& Y1, bool StrongAngle); // Deprecated.
+#define CNorm Cnorm
+void Cnorm(interval& N, interval& X, interval& Y);
+void Cnorm(interval& N, interval& X, interval& Y, interval& Z, int sens = 0);
+#define CScal Cscal
+void Cscal(interval& s, interval& ux, interval& uy, interval& vx, interval& vy);
+void Cscal(interval& s, double& ux, double& uy, interval& vx, interval& vy);
+#define CDet Cdet
+void Cdet(interval& det, interval& ux, interval& uy, interval& vx, interval& vy, int sens = 0);
+void Cdet(interval& det, double& ux, double& uy, interval& vx, interval& vy, int sens = 0);
+void Cdet(interval& det, interval& ux, interval& uy, double& vx, double& vy, int sens = 0);
+void Cstep(interval& Y, interval& X);
+void Cstep(interval& Y, interval& X, int sens, double a = 0);
+void Cramp(interval& Y, interval& X, int sens = 0, double a = 0);
+void Cheaviside(interval& Y, interval& X, int sens = 0, double a = 0);
+void Crect(interval& Z, interval& X, interval& Y, int sens = 0);
+void Crect(interval& Y, interval& X, int sens = 0);
+void Ctriangle(interval& Y, interval& X, int sens = 0);
+void CDistanceDirLine(interval& dist, interval& mx, interval& my, interval& theta, 
+					  double& ax, double& ay, double& bx, double& by);
+int CDistanceDirSegment(interval& dist, interval& mx, interval& my, interval& theta, 
+						double ax, double ay, double bx, double by, int sens = 0);
+void CDistanceDirSegments(interval& distmin, interval& mx, interval& my, interval& theta, 
+						  vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+void CPointInLine(interval& mx, interval& my, double& ax, double& ay, double& bx, double& by);
+#define CinSegment CPointInSegment
+void CPointInSegment(interval& mx, interval& my, double ax, double ay, double bx, double by);
+#define CinSegments CPointInSegments
+void CPointInSegments(interval& mx, interval& my, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+#define CinCircle CPointInCircle
+void CPointInCircle(interval& mx, interval& my, double cx, double cy, double r);
+#define CinCircles CPointInCircles
+void CPointInCircles(interval& mx, interval& my, vector<double> cx, vector<double> cy, vector<double> r, bool truth = true);
+#define CinSegmentsOrCircles CPointInSegmentsOrCircles
+void CPointInSegmentsOrCircles(interval& mx, interval& my, 
+							   vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+							   vector<double> cx, vector<double> cy, vector<double> r);
+void CPointOutsideSegment(interval& mx, interval& my, double& ax, double& ay, double& bx, double& by, bool outer);
+void CPointOutsideSegments(interval& mx, interval& my, 
+						   vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, bool outer);
 
-double    DistanceDirSegment(double mx, double my, double theta, double ax, double ay, double bx, double by);
-double    DistanceDirSegments(double mx, double my, double theta, vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
-double    DistanceDirCercles(double mx, double my, double theta, vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseInSegment(interval& mx, interval& my, interval& phi, double& ax, double& ay, double& bx, double& by);
+void CPoseInSegments(interval& mx, interval& my, interval& phi, 
+					 vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+void CPoseInCircle(interval& mx, interval& my, interval& phi, double& cx, double& cy, double& r);
+void CPoseInCircles(interval& mx, interval& my, interval& phi, vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseInSegmentsOrCircles(interval& mx, interval& my, interval& malpha, 
+							  vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+							  vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseTrans(interval& qx, interval& qy, interval& d, interval& px, interval& py, interval& theta);  //Go straight
+void CPoseRotTrans(interval& qx, interval& qy, interval& beta, interval& phi, interval& d, interval& px, interval& py, interval& alpha);
+void CPoseTransInWallsOrCircles(interval& px, interval& py, interval& alpha, interval& d, 
+								vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+								vector<double> cx,vector<double> cy, vector<double> r);
+void CPoseTransRotInWallsOrCircles(interval& px, interval& py, interval& alpha, interval& d, interval& psi, 
+								   vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+								   vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseRotTransRotInWallsOrCircles(interval& px, interval& py, interval& alpha, interval& phi, interval& d, interval& psi, 
+									  vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+									  vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseRotTransPointInWallsOrCircles(interval& px, interval& py, interval& alpha, interval& phi, interval& d, 
+										vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+										vector<double> cx, vector<double> cy, vector<double> r);
+void CPoseTransPointInWall(interval& px,interval& py, interval& alpha, interval& d, 
+						   double ax, double ay, double bx, double by, bool truth = true);
+void CPoseTransPointInWalls(interval& px,interval& py, interval& alpha, interval& d0, 
+							vector<double>& ax, vector<double>& ay, vector<double>& bx, vector<double>& by, bool truth = true);
+void CPoseTransPointInWallsOrCircles(interval& px,interval& py, interval& alpha, interval& d0, 
+									 vector<double> ax,vector<double> ay,vector<double> bx,vector<double> by, 
+									 vector<double> cx, vector<double> cy, vector<double> r, bool truth = true);
+void CPoseTowardSegment(interval& mx, interval& my, interval& theta, 
+						double& ax, double& ay, double& bx, double& by, bool truth = true);
+#define Ccroisepas Cnocross
+void Cnocross(interval& px, interval& py, interval& mx, interval& my, double& ax, double& ay, double& bx, double& by);
+#define CPatteCroiseAucunSegment CLegCrossNoSegment
+void CLegCrossNoSegment(interval& dist, interval& px, interval& py, interval& theta, 
+						vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+void CLegOnWalls(interval& dist, interval& px, interval& py, interval& theta, 
+				 vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by);
+void CLegOnWallsOrCircles(interval& dist, interval& px, interval& py, interval& theta, 
+						  vector<double> ax, vector<double> ay, vector<double> bx, vector<double> by, 
+						  vector<double> cx, vector<double> cy, vector<double> r);
+//------- Procedure de reduction elementaires sur les intervalles ----------
+void Contract0(char, interval&, interval&, int);
+//void Contract0 (char, interval&, interval&, int, int);
+//void Contract0 (char, interval&, interval&, int, int n=0);
+void Contract0(char, interval&, interval&, interval&, int);
+//void Contract0 (char, interval&, double&, interval&, int); //Luc
+void Contract0(char, interval&);
+void ShowContraction(interval&, interval&, interval&, interval&);
+void IntButterfly(interval& Y, interval Yo, interval dY, interval& X, interval Xo, int sens);
+void Inter1(interval&, interval&, const interval&, const interval&, const interval&);
+void Sucre(interval&, const interval&);
+void Cnotin(interval& X, interval& Y);
+void C_q_in(interval& x, int q, vector<interval>& y);
+//----------------------------------------------------------------------
+// Other
+//----------------------------------------------------------------------
+void diffI(interval &x0, interval &x1, interval &c0, interval &c1);
+// Primitive inclusion tests
+iboolean TestDiskExists(const interval& X, const interval& Y, const interval& P1, const interval& P2, const interval& P3);
+iboolean TestDiskForall(const interval& X, const interval& Y, const interval& P1, const interval& P2, const interval& P3);
 
 #endif // __INTERVAL__

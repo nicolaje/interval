@@ -1,1 +1,5 @@
 build/*
+3rd/matrix_lib/build/*
+3rd/build/
+3rd/matrix_lib/lib/
+lib*

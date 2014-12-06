@@ -1,4 +1,4 @@
-// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS.
+// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS and Jeremy NICOLA.
 
 #include "iboolean.h"
 
@@ -27,7 +27,7 @@ iboolean operator&&(iboolean x, iboolean y)
 	return And(x,y);
 }
 
-iboolean operator||(iboolean& x, iboolean& y)
+iboolean operator||(iboolean x, iboolean y)
 {
 	return Or(x,y);
 }
@@ -42,7 +42,7 @@ bool operator!=(iboolean x, iboolean y)
 	return (x.value != y.value);
 }
 
-iboolean operator!(iboolean& x)
+iboolean operator!(iboolean x)
 {
 	if (x.value == itrue) return iboolean(ifalse);
 	if (x.value == ifalse) return iboolean(itrue);
@@ -54,7 +54,7 @@ iboolean Not(iboolean x)
 	if (x.value == iperhaps) return iperhaps;
 	if (x.value == itrue) return ifalse;
 	if (x.value == ifalse) return itrue;
-	return empty;
+	return iempty;
 }
 
 iboolean Inter(iboolean x, iboolean y)
@@ -62,21 +62,21 @@ iboolean Inter(iboolean x, iboolean y)
 	if (x.value == y.value) return x.value;
 	if (x.value == iperhaps) return y.value;
 	if (y.value == iperhaps) return x.value;
-	return iboolean(empty);
+	return iboolean(iempty);
 }
 
 iboolean Union(iboolean x, iboolean y)
 {	
-	if (x.value == empty) return y.value;
-	if (y.value == empty) return x.value;
+	if (x.value == iempty) return y.value;
+	if (y.value == iempty) return x.value;
 	if (x.value == y.value) return x.value;
 	return iboolean(iperhaps);
 }
 
 iboolean Xor(iboolean x, iboolean y)
 {	
-	if (x.value == empty) return empty;
-	if (y.value == empty) return empty;
+	if (x.value == iempty) return iempty;
+	if (y.value == iempty) return iempty;
 	if (x.value == iperhaps) return iperhaps;
 	if (y.value == iperhaps) return iperhaps;
 	if (x.value == y.value) return ifalse;
@@ -85,7 +85,7 @@ iboolean Xor(iboolean x, iboolean y)
 
 iboolean And(iboolean x, iboolean y)
 {	
-	if ((x.value == empty)||(y.value == empty)) return iboolean(empty);
+	if ((x.value == iempty)||(y.value == iempty)) return iboolean(iempty);
 	if ((x.value == ifalse)||(y.value == ifalse)) return iboolean(ifalse);
 	if ((x.value == iperhaps)||(y.value == iperhaps)) return iboolean(iperhaps);
 	return iboolean(itrue);
@@ -96,7 +96,7 @@ iboolean geq(iboolean x, iboolean y)
 {	
 	iboolean r;
 	r = iboolean(iperhaps);
-	if (y.value == empty) r = iboolean(empty);
+	if (y.value == iempty) r = iboolean(iempty);
 	if (y.value == itrue) r = iboolean(itrue);
 	return Inter(x,r);
 }
@@ -106,11 +106,11 @@ iboolean leq(iboolean x, iboolean y)
 {	
 	iboolean r;
 	r = iboolean(iperhaps);
-	if (y.value == empty)  r = iboolean(empty);
+	if (y.value == iempty)  r = iboolean(iempty);
 	if (y.value == ifalse) r = iboolean(ifalse);
 	return Inter(x,r);
 	/*                               a     &&    (implique b)
-	1*0=\empty                       1     &&      0
+	1*0=\iempty                       1     &&      0
 	1*1=1                            1     &&     [0,1]
 	1*[0,1]=1                        1     &&     [0,1]
 	0*0=0                            0     &&      0
@@ -130,7 +130,7 @@ iboolean Restrict(iboolean x, iboolean y)
 
 iboolean Or(iboolean x, iboolean y)
 {	
-	if ((x.value == empty)||(y.value == empty)) return iboolean(empty);
+	if ((x.value == iempty)||(y.value == iempty)) return iboolean(iempty);
 	if ((x.value == itrue)||(y.value == itrue)) return iboolean(itrue);
 	if ((x.value == iperhaps)||(y.value == iperhaps)) return iboolean(iperhaps);
 	return iboolean(ifalse);
@@ -141,5 +141,6 @@ std::ostream& operator<<(std::ostream& os, const iboolean& a)
 	if (a.value == itrue) os << "itrue";
 	if (a.value == ifalse) os << "ifalse";
 	if (a.value == iperhaps) os << "iperhaps";
+	if (a.value == iempty) os << "iempty";
 	return os;
 }

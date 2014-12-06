@@ -1,4 +1,4 @@
-// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS.
+// Simple interval library from Luc JAULIN, with minor modifications from Fabrice LE BARS and Jeremy NICOLA.
 
 #ifndef __IBOOLEAN__
 #define __IBOOLEAN__
@@ -7,7 +7,7 @@
 // if x=[0,0]=ifalse  : certainly false
 // if x=[0,1]=iperhaps: don't know
 // if x=[1,1]=itrue  : certainly true
-// Otherwise x=empty
+// Otherwise x=iempty
 
 #include <iostream>
 
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-enum IBOOLEAN {itrue, ifalse, iperhaps, empty};
+enum IBOOLEAN {itrue, ifalse, iperhaps, iempty};
 
 class iboolean
 {
@@ -34,8 +34,8 @@ public:
 	iboolean(IBOOLEAN);
 	iboolean(const iboolean&);
 	friend iboolean operator&&(iboolean, iboolean);
-	friend iboolean operator||(iboolean&, iboolean&);
-	friend iboolean operator!(iboolean&);
+	friend iboolean operator||(iboolean, iboolean);
+	friend iboolean operator!(iboolean);
 	friend bool operator==(iboolean, iboolean);
 	friend bool operator!=(iboolean, iboolean);
 	friend iboolean Not(iboolean x);

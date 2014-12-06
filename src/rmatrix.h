@@ -4,8 +4,8 @@
 #define __RMATRIX__
 
 #include "box.h"
-#include "matrix_lib/tnt.h"
-#include "matrix_lib/jama_lu.h"
+#include "tnt.h"
+#include "jama_lu.h"
 
 class rmatrix
 {

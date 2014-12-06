@@ -1536,8 +1536,7 @@ void Cheaviside(interval& Y, interval& X, int sens, double a)
 	interval W = Inter(interval(1), Y);
 	if (sens != -1)
 	{
-		interval U = Union(Z, W);
-		if (X.isEmpty) Y = X;
+        if (X.isEmpty) Y = X;
 		else 
 		{
 			if (Z.isEmpty && W.isEmpty) Y = Z;
@@ -1822,7 +1821,7 @@ void CPointInSegmentsOrCircles(interval& mx, interval& my, vector<double> ax, ve
 	{
 		mx = mx1; my = my1;
 	}
-	if ((ax.size() == 0)&&(cx.size() >= 0))          // pas de segments
+	if ((ax.size() == 0))          // pas de segments
 	{
 		mx = mx2; my = my2;
 	}
@@ -2086,9 +2085,7 @@ void CPoseTransPointInCircles(interval& px,interval& py,interval& alpha, interva
 }
 //----------------------------------------------------------------------
 void CPoseTransPointInWall(interval& px,interval& py,interval& alpha, interval& d0, double ax, double ay, double bx, double by, bool truth)
-{    
-	interval qx=interval(-oo,oo);
-	interval qy=interval(-oo,oo);
+{   
 	interval d=interval(-oo,oo);
 	interval px1(px);
 	interval py1(py);

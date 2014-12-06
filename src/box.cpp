@@ -477,7 +477,7 @@ interval Det(box& U, box& V)
 	interval v1 = V[1];
 	interval u2 = U[2];
 	interval r = u1*v2 - v1*u2;
-	return u1*v2 - v1*u2;
+	return r;
 }
 //----------------------------------------------------------------------
 double Eloignement(box& X, box& Y)
